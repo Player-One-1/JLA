@@ -1,7 +1,12 @@
+#db should be personal, it is recreated anyway
+database.db
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
 
 # C extensions
 *.so
