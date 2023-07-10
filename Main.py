@@ -126,9 +126,14 @@ class KanjiCheck:
             event, values = window.read()
             # End program if user closes window or
             # presses the OK button
-            if event == "Ok" or event == sg.WIN_CLOSED:
-                break                 
+            if event == "Ok":
+                self.stop = False
+                break   
 
+            if event == sg.WIN_CLOSED or event == "Cancel":
+                self.stop = True
+                break
+            
             if event == "kana_input":
                 window["kana_input"].update(ConverToHiragana(values['kana_input']))
 
@@ -137,19 +142,16 @@ class KanjiCheck:
 
             if event == "meaning_input" + "_Enter":
                 event = "Ok"
+                self.stop = False
                 break
+        print(event)
         window.close()
         self.kana_input = values['kana_input']
         self.meaning_input = values['meaning_input']
 
-        if event == "Ok":
-            self.stop = False
-        else:
-            self.stop = True
-
     def CheckCorectness(self):
-        self.kana_correct = self.kana_input in self.reading.split("/") and self.kana_input != ""
-        self.meaning_correct = self.meaning_input.lower() in self.meaning_input.lower().split("/") and self.meaning_input
+        self.kana_correct = (self.kana_input in self.reading.split("/")) and self.kana_input != ""
+        self.meaning_correct = (self.meaning_input.lower() in self.meaning.lower().split("/")) and self.meaning_input != ""
 
     def Error_Window(self):
         layout = [[sg.Text(self.kanji, font=('Arial Bold', 80), text_color='white', background_color='purple', justification='center')]]
@@ -182,9 +184,10 @@ class KanjiCheck:
                 self.meaning_correct = True
                 break
         window.close()
+        
 
     def UpdateLevel(self, con):
-        if (a.meaning_correct and a.kana_correct):
+        if (self.meaning_correct and self.kana_correct):
             self.level = min(10, self.level + 1)
         else:
             self.level = max(-1, self.level -1)
@@ -198,26 +201,112 @@ class KanjiCheck:
         con.commit()
         return sql
 
+
+def RunKanjiChecking():
+    kanji_check_selected_id = stats[ (stats['next_review_kanji'] < datetime.datetime.now()) & ~vocabulary['kanji'].isnull()].index
+    KanjiChecks = [KanjiCheck(i) for i in kanji_check_selected_id]
+    while KanjiChecks:
+        random.shuffle(KanjiChecks)
+        current_item = KanjiChecks[0]
+        current_item.AskInWindow()
+        if current_item.stop:
+            break
+
+        current_item.CheckCorectness()
+        if not (current_item.meaning_correct and current_item.kana_correct):
+            current_item.Error_Window()
+        
+        current_item.UpdateLevel(con)
+        if (current_item.meaning_correct and current_item.kana_correct):
+            KanjiChecks = KanjiChecks[1:]
+        else:
+            random.shuffle(KanjiChecks)
+
+#%%
+class MeaningCheck:
+    def __init__(self,id) -> None:
+        self.id = id
+        self.reading = vocabulary.loc[id,'reading']
+        self.meaning = vocabulary.loc[id,'meaning']
+        self.level = stats.loc[id,'level_translate']
+        self.next_review = stats.loc[id,'next_review_translate']    
+
+    def AskInWindow(self):
+        layout = [  [sg.Text(self.meaning, font=('Arial Bold', 80), text_color='white', background_color='purple', justification='center')],     # Part 2 - The Layout
+                [sg.Input(key="kana_input", enable_events=True, font = ('Arial Bold', 20) , size=(20,10))],
+                [sg.Button('Ok'), sg.Button('Cancel')] ]
+
+        # Create the window
+        window = sg.Window('JLA', layout, background_color="Purple", finalize=True)      # Part 3 - Window Defintion
+        window['kana_input'].bind("<Return>", "_Enter")
+
+        window.force_focus()
+        window['kana_input'].set_focus()
+
+        # Display and interact with the Window
+        while True:
+            
+            event, values = window.read()
+            # End program if user closes window or
+            # presses the OK button
+            if event == "Ok":
+                self.stop = False
+                break   
+
+            if event == sg.WIN_CLOSED or event == "Cancel":
+                self.stop = True
+                break
+            
+            if event == "kana_input":
+                window["kana_input"].update(ConverToHiragana(values['kana_input']))
+
+            if event == "kana_input" + "_Enter":
+                event = "Ok"
+                self.stop = False
+                break
+        print(event)
+        window.close()
+        self.kana_input = values['kana_input']
+
+    
+a = MeaningCheck("base:0")
+a. AskInWindow()
+
+#%%
+def Main_Window():
+    items_backlog = str(len(stats[ (stats['next_review_kanji'] < datetime.datetime.now()) & ~vocabulary['kanji'].isnull()].index))
+
+    layout = [[sg.Text("items: " + items_backlog, font=('Arial Bold', 30)), sg.Button("Kanji")]
+              ,[sg.Button("Close")]
+            ]
+    window = sg.Window("test",layout)
+    while True:
+        event, values = window.read()
+        if event == "Ok" or event == sg.WIN_CLOSED:
+            break
+
+        if event == "Kanji":
+            RunKanjiChecking()
+            break
+    window.close()
+
+
+
+
+
 #%%
 
 if __name__ == "__main__":
     stats,vocabulary, con = InitiateProgram()
-    stats_filtered = stats[ (stats['next_review_kanji'] < datetime.datetime.now()) & ~vocabulary['kanji'].isnull()]
-    KanjiChecks = [KanjiCheck(i) for i in stats_filtered.index]
-    random.shuffle(KanjiChecks)
 
-    while KanjiChecks:
-        a = KanjiChecks[0]
-        a.AskInWindow()
-        a.CheckCorectness()
-        if not (a.meaning_correct and a.kana_correct):
-            a.Error_Window()
-        
-        a.UpdateLevel(con)
-        if (a.meaning_correct and a.kana_correct):
-            KanjiChecks = KanjiChecks[1:]
-        else:
-            random.shuffle(KanjiChecks)
+    Main_Window()
+
+
+
+    
+
+
+
 
 
 
