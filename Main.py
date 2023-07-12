@@ -50,7 +50,7 @@ def ConverToHiragana(string:str):
                     "pya": "ぴゃ", "pyu": "ぴゅ", "pyo": "ぴょ",
                     "mya": "みゃ", "myu": "みゅ", "myo": "みょ",
                     "rya": "りゃ", "ryu": "りゅ", "ryo": "りょ",
-                    "shi": "し", "chi": "ち"
+                    "shi": "し", "chi": "ち", 'tsu':'つ'
                 }
 
     if string[-3:] in DICTIONARY_3:
@@ -144,7 +144,6 @@ class KanjiCheck:
                 event = "Ok"
                 self.stop = False
                 break
-        print(event)
         window.close()
         self.kana_input = values['kana_input']
         self.meaning_input = values['meaning_input']
@@ -199,7 +198,6 @@ class KanjiCheck:
         cur.execute(sql)
         cur.close()
         con.commit()
-        return sql
 
 
 def RunKanjiChecking():
@@ -268,25 +266,87 @@ class MeaningCheck:
         window.close()
         self.kana_input = values['kana_input']
 
+    def CheckCorectness(self):
+        self.kana_correct = (self.kana_input.lower() in self.reading.lower().split("/")) and self.kana_input != ""
     
-a = MeaningCheck("base:0")
-a. AskInWindow()
+    def Error_Window(self):
+        layout = [[sg.Text(self.meaning, font=('Arial Bold', 80), text_color='white', background_color='purple', justification='center')],
+                  [sg.Text("reading wrong X: "+ self.kana_input, text_color="Red", font=('Arial Bold', 20), background_color="white"), sg.Button("Show",key="show_kana"), sg.Text("",key="kana", font=('Arial Bold', 20), background_color="white", text_color="Black")]
+                  
+                  ]
+        layout.append([sg.Button('Ok'),sg.Button('Force Correct') ])
+        window = sg.Window('JLA Error Window', layout, background_color="Purple", finalize=True)      # Part 3 - Window Defintion
+        window.force_focus()
+
+        while True:
+            
+            event, values = window.read()
+            if event == "Ok" or event == sg.WIN_CLOSED:
+                break
+            if event == "show_kana":
+                window["kana"].update(self.reading)
+            if event == 'Force Correct':
+                self.kana_correct = True
+                break
+        window.close()
+
+    def UpdateLevel(self, con):
+        if self.kana_correct:
+            self.level = min(10, self.level + 1)
+        else:
+            self.level = max(-1, self.level -1)
+        
+        self.next_review = (datetime.datetime.now() + pd.Timedelta(LEVELS_TIMINGS[self.level])).replace(minute=0, second=0, microsecond=1)
+
+        sql = "Update stats set level_translate = {}, next_review_translate = '{}' where id = '{}'".format(self.level, self.next_review, self.id)
+        cur = con.cursor()
+        cur.execute(sql)
+        cur.close()
+        con.commit()
+
+
+def RunMeaningCheck():
+    Meaning_check_selected_id = stats[ (stats['next_review_translate'] < datetime.datetime.now()) & ~vocabulary['reading'].isnull()].index
+    MeaningChecks = [MeaningCheck(i) for i in Meaning_check_selected_id]
+    while MeaningChecks:
+        random.shuffle(MeaningChecks)
+        current_item = MeaningChecks[0]
+        current_item.AskInWindow()
+        if current_item.stop:
+            break
+
+        current_item.CheckCorectness()
+        if not current_item.kana_correct:
+            current_item.Error_Window()
+        
+        current_item.UpdateLevel(con)
+        if current_item.kana_correct:
+            MeaningChecks = MeaningChecks[1:]
+        else:
+            random.shuffle(MeaningChecks)
+
 
 #%%
 def Main_Window():
-    items_backlog = str(len(stats[ (stats['next_review_kanji'] < datetime.datetime.now()) & ~vocabulary['kanji'].isnull()].index))
+    kanji_backlog = str(len(stats[ (stats['next_review_kanji'] < datetime.datetime.now()) & ~vocabulary['kanji'].isnull()].index))
+    translate_backlog = str(len(stats[ (stats['next_review_translate'] < datetime.datetime.now()) & ~vocabulary['reading'].isnull()].index))
 
-    layout = [[sg.Text("items: " + items_backlog, font=('Arial Bold', 30)), sg.Button("Kanji")]
+    layout = [[sg.Text("items: " + kanji_backlog, font=('Arial Bold', 30)), sg.Button("Kanji", font=('Arial Bold', 30))],
+              [sg.Text("items: " + translate_backlog, font=('Arial Bold', 30)), sg.Button("Translate", font=('Arial Bold', 30))]
               ,[sg.Button("Close")]
             ]
     window = sg.Window("test",layout)
     while True:
         event, values = window.read()
-        if event == "Ok" or event == sg.WIN_CLOSED:
+        if event == "Close" or event == sg.WIN_CLOSED:
             break
 
         if event == "Kanji":
             RunKanjiChecking()
+            break
+
+        if event == "Translate":
+            RunMeaningCheck()
             break
     window.close()
 

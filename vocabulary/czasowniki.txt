@@ -1,0 +1,35 @@
+kanji,reading,meaning
+飲んでいます,のんでいます,is drinking
+,はいています,is wearing/(below the waist)
+持っています,もっています,is having/possess/hold/carry
+被っています,かぶっています,is wearing/(on head)
+食べています,たべています,is eating
+泳いでいます,およいでいます,is swimming
+寝ています,ねています,is sleeping
+書いています,かいています,is writing
+料理しています,りょうりしています,is cooking/(lit. is doing meal)
+歩いています,あるいています,is walking
+運転しています,うんてんしています,is driving/(lit. doing the driving)
+飼っています,かっています,to have a pet
+着ています,きています,is wearing (above the waist or on the entire body)
+買っています,かっています,is buying
+遊んでいます,あそんでいます,is playing
+住んでいます,すんでいます,I live in
+座っています,すわっています,is sitting
+立っています,たっています,is standing
+聞いています,きいています,is listening
+見ています,みています,is watching
+大好きです,だいすきです,like it very much/(lit. be liked very much)
+働いています,はたらいています,is working
+来ています,きています,is visiting/is coming
+話します,はなします,to speak
+教えています,おしえています,is teaching
+洗っています,あらっています,is washing
+勉強しています,べんきょうしています,studying/doing study
+,とかしています,brushing/(hair)
+磨いています,みがいています,brushing/(teeth)
+,いります,to need/require
+,ほしいです,wanting (to have)
+売っています,うっています,is selling
+買い物しています,かいものをしています,is buying/is doing the shopping
+壊れています,こわれています,is broken

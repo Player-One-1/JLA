@@ -1,0 +1,17 @@
+kanji,reading,meaning
+果物,くだもの,fruit
+野菜,やさい,vegetable
+お金,おかね,money
+古い,ふるい,old
+新しい,あたらしい,new
+店,みせ,store/shop
+宝石,ほうせき,gem/jewel
+宝石店,ほうせきてん,jewellery store​/jewelry store/jewelry
+買い物,かいもの,shopping
+屋,や,shop/store/restaurant
+薬,くすり,medicine/drugs
+安い,やすい,cheap/inexpensive
+高い,たかい,expensive/high-priced​/tall
+軽い,かるい,light/lightweight/effortless
+重い,おもい,heavy/weighty
+動物,どうぶつ,animal
