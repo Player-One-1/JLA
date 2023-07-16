@@ -1,0 +1,10 @@
+kanji,reading,meaning
+上,うえ,on
+中,なか,inside
+下,した,under
+外,そと,outside
+近く,ちかく,near
+から遠く,からとおく,far
+屋内,おくない,indoor/inside
+後,あと,after/behind
+前,まえ,before/in front of

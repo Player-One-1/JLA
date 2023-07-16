@@ -15,3 +15,18 @@ kanji,reading,meaning
 軽い,かるい,light/lightweight/effortless
 重い,おもい,heavy/weighty
 動物,どうぶつ,animal
+金属,きんぞく,metal
+椅子,いす,chair/stool
+出来ています,できています,is made of
+紙,かみ,paper
+払っています,はらっています,is paying
+現金,げんきん,cash
+,もっと,more/even more/longer
+,たくさん,a lot/lots/much
+,おもちゃ,toy
+肉,にく,flesh/meat
+演劇,えんげき,drama/theatre/play/theater
+映画,えいが,movie/film
+遅い,おそい,slow
+早い,はやい,fast
+若い,わかい,young/youthful

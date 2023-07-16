@@ -31,5 +31,5 @@ kanji,reading,meaning
 ,いります,to need/require
 ,ほしいです,wanting (to have)
 売っています,うっています,is selling
-買い物しています,かいものをしています,is buying/is doing the shopping
+買い物をしています,かいものをしています,is buying/is doing the shopping
 壊れています,こわれています,is broken

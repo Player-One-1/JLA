@@ -1,0 +1,16 @@
+kanji,reading,meaning
+嘘,うそ,lie
+嘘つき,うそつき,liar
+完璧,かんぺき,perfect/flawless
+永遠,えいえん,eternity
+世界,せかい,world
+世界の全て,せかいのすべて,whole world
+惑星,わくせい,planet
+星,ほし,star
+孤独,こどく,loneliness/solitude
+馬鹿,ばか,fool/idiot/trivial matter/folly
+音,おと,sound
+魔女,まじょ,witch
+未来,みらい,future
+会長,かいちょう,chairman/president
+書記,しょき,clerk/secretary

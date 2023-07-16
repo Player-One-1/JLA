@@ -1,0 +1,13 @@
+kanji,reading,meaning
+一週間,いっしゅうかん,one week
+一月,ひとつき,one month
+一年,いちねん,one year
+一日,いちにち,one day
+秋,あき,autumn
+冬,ふゆ,winter
+夏,なつ,summer
+春,はる,spring
+朝,あさ,in the morning
+昼,ひる,in the day
+夕方,ゆうがた,evening/dusk
+夜,よる,night

@@ -52,8 +52,13 @@ def ConverToHiragana(string:str):
                     "rya": "りゃ", "ryu": "りゅ", "ryo": "りょ",
                     "shi": "し", "chi": "ち", 'tsu':'つ'
                 }
+    DICTIONARY_4 = {"sshu" : "っしゅ"}
 
-    if string[-3:] in DICTIONARY_3:
+
+    if string[-4:] in DICTIONARY_4:
+        updated_value = string[:-4] + DICTIONARY_4[string[-4:]]    
+    
+    elif string[-3:] in DICTIONARY_3:
         updated_value = string[:-3] + DICTIONARY_3[string[-3:]]
 
     elif string[-2:] in DICTIONARY_2:
@@ -70,6 +75,7 @@ def InitiateProgram():
         def ReadFile(fname):
             df = pd.read_csv("vocabulary\\" + fname)
             df.index = fname[:-4]+":" + df.index.astype(str)
+
             return df
         vocabulary = pd.concat([ReadFile(fname) for fname in os.listdir('vocabulary')] )
         return vocabulary
@@ -94,18 +100,19 @@ def InitiateProgram():
     vocabulary = OpenVocabulary()
     stats = OpenStats(con)
     stats = UpdateStatsForMissingVocabulary(stats, vocabulary, con)
+    data = pd.concat([vocabulary, stats], axis= 1)
 
-    return stats,vocabulary, con
+    return data, con
 
 #%%
 class KanjiCheck:
     def __init__(self,id) -> None:
         self.id = id
-        self.kanji = vocabulary.loc[id,'kanji']
-        self.reading = vocabulary.loc[id,'reading']
-        self.meaning = vocabulary.loc[id,'meaning']
-        self.level = stats.loc[id,'level_kanji']
-        self.next_review = stats.loc[id,'next_review_kanji']
+        self.kanji = data.loc[id,'kanji']
+        self.reading = data.loc[id,'reading']
+        self.meaning = data.loc[id,'meaning']
+        self.level = data.loc[id,'level_kanji']
+        self.next_review = data.loc[id,'next_review_kanji']
 
     def AskInWindow(self):
         layout = [  [sg.Text(self.kanji, font=('Arial Bold', 80), text_color='white', background_color='purple', justification='center')],     # Part 2 - The Layout
@@ -201,10 +208,10 @@ class KanjiCheck:
 
 
 def RunKanjiChecking():
-    kanji_check_selected_id = stats[ (stats['next_review_kanji'] < datetime.datetime.now()) & ~vocabulary['kanji'].isnull()].index
+    kanji_check_selected_id = data[ (data['next_review_kanji'] < datetime.datetime.now()) & ~data['kanji'].isnull()].index
     KanjiChecks = [KanjiCheck(i) for i in kanji_check_selected_id]
+    random.shuffle(KanjiChecks)
     while KanjiChecks:
-        random.shuffle(KanjiChecks)
         current_item = KanjiChecks[0]
         current_item.AskInWindow()
         if current_item.stop:
@@ -218,16 +225,17 @@ def RunKanjiChecking():
         if (current_item.meaning_correct and current_item.kana_correct):
             KanjiChecks = KanjiChecks[1:]
         else:
-            random.shuffle(KanjiChecks)
+            i = random.randint(2,6)
+            KanjiChecks = KanjiChecks[1:i] + KanjiChecks[0] + KanjiChecks[i:]
 
 #%%
 class MeaningCheck:
     def __init__(self,id) -> None:
         self.id = id
-        self.reading = vocabulary.loc[id,'reading']
-        self.meaning = vocabulary.loc[id,'meaning']
-        self.level = stats.loc[id,'level_translate']
-        self.next_review = stats.loc[id,'next_review_translate']    
+        self.reading = data.loc[id,'reading']
+        self.meaning = data.loc[id,'meaning']
+        self.level = data.loc[id,'level_translate']
+        self.next_review = data.loc[id,'next_review_translate']    
 
     def AskInWindow(self):
         layout = [  [sg.Text(self.meaning, font=('Arial Bold', 80), text_color='white', background_color='purple', justification='center')],     # Part 2 - The Layout
@@ -262,7 +270,6 @@ class MeaningCheck:
                 event = "Ok"
                 self.stop = False
                 break
-        print(event)
         window.close()
         self.kana_input = values['kana_input']
 
@@ -306,10 +313,10 @@ class MeaningCheck:
 
 
 def RunMeaningCheck():
-    Meaning_check_selected_id = stats[ (stats['next_review_translate'] < datetime.datetime.now()) & ~vocabulary['reading'].isnull()].index
+    Meaning_check_selected_id = data[ (data['next_review_translate'] < datetime.datetime.now()) & ~data['reading'].isnull()].index
     MeaningChecks = [MeaningCheck(i) for i in Meaning_check_selected_id]
+    random.shuffle(MeaningChecks)
     while MeaningChecks:
-        random.shuffle(MeaningChecks)
         current_item = MeaningChecks[0]
         current_item.AskInWindow()
         if current_item.stop:
@@ -323,33 +330,43 @@ def RunMeaningCheck():
         if current_item.kana_correct:
             MeaningChecks = MeaningChecks[1:]
         else:
-            random.shuffle(MeaningChecks)
+            i = random.randint(2,6)
+            MeaningChecks = MeaningChecks[1:i] + MeaningChecks[0] + MeaningChecks[i:]
 
+
+def CalculateCohorts():
+    cohorts = pd.DataFrame(index = range(0,11))
+    cohorts['level_kanji'] = data['level_kanji'].value_counts()
+    cohorts['level_translate'] = data['level_translate'].value_counts()
+    cohorts = cohorts.fillna(0)
+    cohorts = cohorts.astype(int)
+    cohorts.index.name = "level"
+    cohorts = cohorts.reset_index()
+    return cohorts
+    
 
 #%%
 def Main_Window():
-    kanji_backlog = str(len(stats[ (stats['next_review_kanji'] < datetime.datetime.now()) & ~vocabulary['kanji'].isnull()].index))
-    translate_backlog = str(len(stats[ (stats['next_review_translate'] < datetime.datetime.now()) & ~vocabulary['reading'].isnull()].index))
+    kanji_backlog = str(len(data[ (data['next_review_kanji'] < datetime.datetime.now()) & ~data['kanji'].isnull()].index))
+    translate_backlog = str(len(data[ (data['next_review_translate'] < datetime.datetime.now()) & ~data['reading'].isnull()].index))
+    cohorts = CalculateCohorts()
 
     layout = [[sg.Text("items: " + kanji_backlog, font=('Arial Bold', 30)), sg.Button("Kanji", font=('Arial Bold', 30))],
               [sg.Text("items: " + translate_backlog, font=('Arial Bold', 30)), sg.Button("Translate", font=('Arial Bold', 30))]
-              ,[sg.Button("Close")]
+              ,[sg.Button("Close"),
+                [sg.Table(values=cohorts.values.tolist(), headings=cohorts.columns.tolist(), size=(1000,11))]]
             ]
-    window = sg.Window("test",layout)
-    while True:
-        event, values = window.read()
-        if event == "Close" or event == sg.WIN_CLOSED:
-            break
+    window = sg.Window("Japanese Learning App",layout)
 
-        if event == "Kanji":
-            RunKanjiChecking()
-            break
+    event, values = window.read()
+    if event == "Kanji":
+        RunKanjiChecking()
 
-        if event == "Translate":
-            RunMeaningCheck()
-            break
+    if event == "Translate":
+        RunMeaningCheck()
     window.close()
 
+    return event
 
 
 
@@ -357,17 +374,12 @@ def Main_Window():
 #%%
 
 if __name__ == "__main__":
-    stats,vocabulary, con = InitiateProgram()
 
-    Main_Window()
-
-
-
-    
-
-
-
-
+    while True:
+        data,con = InitiateProgram()
+        event = Main_Window()
+        if event == "Close" or event == None:
+            break
 
 
 # %%
