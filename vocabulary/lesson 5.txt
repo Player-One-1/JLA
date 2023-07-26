@@ -1,0 +1,31 @@
+kanji,reading,meaning
+銀行,ぎんこう,bank
+郵便局,ゆうびんきょく,post office
+美術館,びじゅつかん,museum/art museum/art gallery
+図書館,としょかん,library
+仕事場,しごとば,workplace
+学校,がっこう,school
+行きたい,いきたい,want to go
+地図,ちず,map/plan/chart
+お手洗い,おてあらい,toilet
+~番目,ばんめ,counter for position/place
+列,れつ,row/line/file/column/queue
+仕事,しごと,work/job/labor/labour
+地下鉄,ちかてつ,metro/subway
+鉄,てつ,iron/steel
+席,せき,seat/position/place
+駅,えき,railway station/train station
+-まで,まで,to/(a place or person)/(particle)
+道,みち,route/way​/road/path
+バス停,ぶすたい,bus stop
+飛行機,ひこうき,airplane
+電車,でんしゃ,train
+空港,くうこう,airport
+時計,とけい,clock
+腕時計,うでどけい,wristwatch/watch
+時,じ,hour
+午後,ごご,afternoon/p.m./PM
+午前,ごぜん,morning/a.a./AM
+出発,しゅっぱつ,departure/leaving/setting off​
+到着,とうちゃく,arrival
+秒,びょう,second/(1/60 of minute)

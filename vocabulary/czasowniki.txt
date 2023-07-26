@@ -1,35 +1,50 @@
 kanji,reading,meaning
-飲んでいます,のんでいます,is drinking
-,はいています,is wearing/(below the waist)
-持っています,もっています,is having/possess/hold/carry
-被っています,かぶっています,is wearing/(on head)
-食べています,たべています,is eating
-泳いでいます,およいでいます,is swimming
-寝ています,ねています,is sleeping
-書いています,かいています,is writing
-料理しています,りょうりしています,is cooking/(lit. is doing meal)
-歩いています,あるいています,is walking
-運転しています,うんてんしています,is driving/(lit. doing the driving)
-飼っています,かっています,to have a pet
-着ています,きています,is wearing (above the waist or on the entire body)
-買っています,かっています,is buying
-遊んでいます,あそんでいます,is playing
-住んでいます,すんでいます,I live in
-座っています,すわっています,is sitting
-立っています,たっています,is standing
-聞いています,きいています,is listening
-見ています,みています,is watching
-大好きです,だいすきです,like it very much/(lit. be liked very much)
-働いています,はたらいています,is working
-来ています,きています,is visiting/is coming
-話します,はなします,to speak
-教えています,おしえています,is teaching
-洗っています,あらっています,is washing
-勉強しています,べんきょうしています,studying/doing study
-,とかしています,brushing/(hair)
-磨いています,みがいています,brushing/(teeth)
-,いります,to need/require
-,ほしいです,wanting (to have)
-売っています,うっています,is selling
-買い物をしています,かいものをしています,is buying/is doing the shopping
-壊れています,こわれています,is broken
+飲む,のむ,to drink
+履く,はく,to put on/to wear/(below the waist: pants; skirt; footwear)
+持つ,もつ,to have/to own/to carry​/to hold/(in one`s hand)
+被る,かぶる,to put on/to wear/(on one`s head)
+食べる,たべる,to eat
+泳ぐ,およぐ,to swim
+寝る,ねる,to sleep/(lying down)​/to go to bed
+書く,かく,to write/to draw
+料理する,りょうりする,to cook/to do the meal
+歩く,あるく,to walk
+運転する,うんてんする,to drive/(to do the driving)
+飼う,かう,to have a pet/to keep/to own
+着る,きる,to wear/(from the shoulders down:dress;suit;sweater)/to put on
+買う,かう,to buy/to purchase
+遊ぶ,あそぶ,to play
+住む,すむ,to live/(somewhere)/to inhabit/to dwell
+座る,すわる,to sit/to squat
+立つ,たつ,to stand/to stand up
+聞く,きく,to hear/to listen
+見る,みる,to see/to watch/to observe
+働く,はたらく,to work/to labor
+来る,くる,to come/to visit
+話す,はなす,to speak
+教える,おしえる,to teach/to tell/to inform
+洗う,あらう,to wash/to rinse
+勉強する,べんきょうする,to study/(to do the study​)
+,とかす,to brush/to comb/(hair)
+磨く,みがく,to brush/(teeth)/to polish/to scrub
+,いる,to need/require
+売る,うる,to sell
+買い物する,かいものする,to shop/to do the shopping
+壊れる,こわれる,to break/to be broken
+疲れる,つかれる,to get tired/to tire/to get fatigued
+出来る,できる,to be made of/to be able to do
+払う,はらう,to pay
+開く,ひらく,to open/to unseal/(intransitive)
+開ける,あける,to open/(transitive)
+閉まる,しまる,to be closed/to be shut/(intransitive)
+閉める,しめる,to close/(transitive)
+閉じる,とじる,to close
+濡れる,ぬれる,to get wet
+乾く,かわく,to get dry
+汚れる,よごれる,to get dirty
+行く,いく,to go
+乗る,のる,to get on train/to embark/to get in
+降りる,おりる,to get off/to disembark/to dismount
+走る,はしる,to run
+並ぶ,ならぶ,to line up/to stand in as line
+待つ,まつ,to wait

@@ -6,5 +6,12 @@ kanji,reading,meaning
 近く,ちかく,near
 から遠く,からとおく,far
 屋内,おくない,indoor/inside
-後,あと,after/behind
+後,あと,after/behind/(in time)
 前,まえ,before/in front of
+後ろ,うしろ,behind/(in space)
+横,よこ,beside/next to
+左,ひだり,left direction
+右,みぎ,right direction
+隣,となり,next/next to/adjoining/adjacent
+曲がる,まがる,to turn
+,まっすぐ,straight/direct/ahead

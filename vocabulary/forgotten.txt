@@ -1,0 +1,11 @@
+kanji,reading,meaning
+病院,びょういん,hospital
+医者,いしゃ,doctor/physician
+警察官,けいさつかん,policeman/police officer
+,いくら,how much
+,どういたしまして,you're welcome/my pleasure/youre welocome
+年をとっています,としをとっています,old/(about a person. polite)
+大きすぎ,おおきすぎ,too big
+小さすぎ,ちさすぎ,too small
+大好き,だいすき,liking very much/being very fond of​/loving
+欲しい,ほしい,wanting/(to have)/desiring

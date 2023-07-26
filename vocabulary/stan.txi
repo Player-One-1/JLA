@@ -6,14 +6,10 @@ kanji,reading,meaning
 熱い,あつい,hot/(mnie jest goraco)
 喉が乾いています,のどがかわいています,being thirsty/(throat dry)
 お腹が空いています,おなかがすいています,being hungry/(stomach empty or hungry)
-疲れています,つかれています,is tired
 具合が悪い,ぐあいがわるい,to feel sick/(lit state is bad-undesirable-ugly)
 元気です,げんきです,I am fine
 臭い,くさい,stinky
 不味い,まずい,bad tasting
 良い匂い,いいにおい,good smelling
 ,おいしい,tasty
-濡れています,ぬれています,being wet
-乾いています,かわいています,being dry
-汚れています,よごれています,being dirty
 綺麗,きれい,pretty/clean

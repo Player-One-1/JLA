@@ -14,3 +14,6 @@ kanji,reading,meaning
 未来,みらい,future
 会長,かいちょう,chairman/president
 書記,しょき,clerk/secretary
+夢,ゆめ,dream
+死ぬ,しぬ,to die
+狼,おおかみ,wolf
