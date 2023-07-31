@@ -17,3 +17,5 @@ kanji,reading,meaning
 夢,ゆめ,dream
 死ぬ,しぬ,to die
 狼,おおかみ,wolf
+闇,やみ,darkness/the dark
+香辛料,こうしんりょう,spice/spices

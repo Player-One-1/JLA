@@ -29,3 +29,20 @@ kanji,reading,meaning
 出発,しゅっぱつ,departure/leaving/setting off​
 到着,とうちゃく,arrival
 秒,びょう,second/(1/60 of minute)
+時間通り,じかんどおり,on time/punctually
+部屋,へや,room/chamber
+番号,ばんごう,number/series of digits
+一列,いちれつ,row/line
+側,がわ,side
+湖,みずうみ,lake
+森,もり,forest
+海岸,かいがん,beach/coast
+降る,ふる,to fall/(of rain;snow;ash;etc.)
+雨,あめ,rain
+雪,ゆき,snow
+晴れ,はれ,clear weather
+曇り,くもり,cloudy weather
+,どう,how
+暑い,あつい,hot/(only weather)
+,これから,from now on/after this/in the future
+劇場,げきじょう,theater/theatre

@@ -6,6 +6,8 @@ import datetime
 import random
 #%%
 LEVELS_TIMINGS = {-1:"0s",0:"0s",1:"1h",2:"12h",3:"1d",4:"2d",5:"4d",6:"7d",7:"14d",8:"4w",9:"8w",10:"26w"}
+MINIMUM_INTERVAL = 5
+MAXIMUM_INTERVAL = 10
 
 def ConverToHiragana(string:str):
     DICTIONARY_1 = {"a": "あ", "i": "い", "u": "う", "e": "え", "o": "お"}
@@ -81,6 +83,8 @@ def UpdateDatabase(con):
     def OpenVocabulary():
         def ReadFile(fname):
             df = pd.read_csv("vocabulary\\" + fname).fillna("")
+            df['kanji'] = df['kanji'].str.strip()
+            df['reading'] = df['reading'].str.strip()
             df = df.assign(folder = fname[:-4])
             return df
         
@@ -265,7 +269,7 @@ def RunKanjiChecking():
         if (current_item.meaning_correct and current_item.kana_correct):
             KanjiChecks = KanjiChecks[1:]
         else:
-            i = random.randint(3,7)
+            i = random.randint(MINIMUM_INTERVAL,MAXIMUM_INTERVAL)
             KanjiChecks = KanjiChecks[1:i] + [KanjiChecks[0]] + KanjiChecks[i:]
 
 #%%
@@ -368,7 +372,7 @@ def RunMeaningCheck():
         if current_item.kana_correct:
             MeaningChecks = MeaningChecks[1:]
         else:
-            i = random.randint(3,7)
+            i = random.randint(MINIMUM_INTERVAL,MAXIMUM_INTERVAL)
             MeaningChecks = MeaningChecks[1:i] + [MeaningChecks[0]] + MeaningChecks[i:]
 
 #%%

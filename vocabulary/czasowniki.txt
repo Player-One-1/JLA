@@ -48,3 +48,7 @@ kanji,reading,meaning
 走る,はしる,to run
 並ぶ,ならぶ,to line up/to stand in as line
 待つ,まつ,to wait
+遅れる,おくれる,to be late
+,できる,to be able to/can
+,もらう,to receive/to take/to accept
+ 言う ,いう,to say

@@ -1,0 +1,21 @@
+kanji,reading,meaning
+服,ふく,clothes
+昨日,きのう,yesterday
+明日,あした,tomorrow
+先週,せんしゅう,last week
+来週,らいしゅう,next week​
+冊,さつ,counter for books
+机,つくえ,desk
+,あげる,to give
+生徒,せいと,pupil/student/schoolchild
+今朝,けさ,this morning
+数学, すうがく ,mathematics
+美術, びじゅつ ,art/fine arts
+歴史, れきし ,history
+理科,  りか ,science
+音楽, おんがく ,music
+言葉, ことば ,word/phrase/language
+標識, ひょうしき ,sign/road sign/marker/beacon
+意味,いみ,meaning/sense
+どういう意味ですか,どういういみですか,what meaning
+もう一度ください,もういちどください,once again please
