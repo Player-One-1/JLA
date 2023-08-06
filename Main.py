@@ -416,15 +416,18 @@ def Main_Window(con,data):
 
     return event
 
+def run_db_update(con):
+    updater = DatabaseUpdater(con)
+    updater.run_update()
+    msg = "Database Updated.\nRecords added: {}\nRecords deactivated: {}\nRecords reactivated: {}\nRecords updated: {}".format(updater.update_stats['added'], updater.update_stats['deactivated'], updater.update_stats['reactivated'],updater.update_stats['updated'])
+    sg.popup(msg)
+
+
 #%%
 
 if __name__ == "__main__":
     con = sqlite3.connect("database.db")
-    updater = DatabaseUpdater(con)
-    updater.run_update()
-
-    msg = "Database Updated.\nRecords added: {}\nRecords deactivated: {}\nRecords reactivated: {}\nRecords updated: {}".format(updater.update_stats['added'], updater.update_stats['deactivated'], updater.update_stats['reactivated'],updater.update_stats['updated'])
-    sg.popup(msg)
+    run_db_update(con)
 
     while True:
         data = fetch_data_from_db(con)
