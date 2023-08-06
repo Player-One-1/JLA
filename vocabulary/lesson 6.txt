@@ -19,3 +19,12 @@ kanji,reading,meaning
 意味,いみ,meaning/sense
 どういう意味ですか,どういういみですか,what meaning
 もう一度ください,もういちどください,once again please
+妻,つま,wife
+,でも,but/however
+従業員, じゅうぎょういん ,employee/worker​
+工場, こうじょう ,factory/plant
+教師, きょうし ,teacher/(classroom)
+~いた時,いたとき,while/(while ~something)
+水はいかがですか,みずはいかがですか,how about some water/how about some water?
+お願いします,おねがいします,please/yes please
+結構, けっこう ,sufficient/satisfactory/enough/fine/all right/OK​

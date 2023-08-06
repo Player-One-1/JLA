@@ -52,3 +52,4 @@ kanji,reading,meaning
 ,できる,to be able to/can
 ,もらう,to receive/to take/to accept
  言う ,いう,to say
+  呉れる , くれる,to give/(the receiver is the speaker or someone close to the speaker)

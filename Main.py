@@ -5,11 +5,16 @@ import sqlite3
 import datetime
 import random
 #%%
+
 LEVELS_TIMINGS = {-1:"0s",0:"0s",1:"1h",2:"12h",3:"1d",4:"2d",5:"4d",6:"7d",7:"14d",8:"4w",9:"8w",10:"26w"}
 MINIMUM_INTERVAL = 5
 MAXIMUM_INTERVAL = 10
 
-def ConverToHiragana(string:str):
+def convert_to_hiragana(string:str):
+    """function converts string to hiragana.
+    It really converts only last set of letters in hiragana character, but when applies after ever character, it is enough.
+    !!!to do: Complete the 4 length dictionary. Currently I ad a 4 letter combination whenever encountered, only one so far.
+    """
     DICTIONARY_1 = {"a": "あ", "i": "い", "u": "う", "e": "え", "o": "お"}
     DICTIONARY_2 = {"ka": "か", "ki": "き", "ku": "く", "ke": "け", "ko": "こ",
                     "ga": "が", "gi": "ぎ", "gu": "ぐ", "ge": "げ", "go": "ご",
@@ -56,98 +61,97 @@ def ConverToHiragana(string:str):
                 }
     DICTIONARY_4 = {"sshu" : "っしゅ"}
 
-
     if string[-4:] in DICTIONARY_4:
         updated_value = string[:-4] + DICTIONARY_4[string[-4:]]    
-    
     elif string[-3:] in DICTIONARY_3:
         updated_value = string[:-3] + DICTIONARY_3[string[-3:]]
-
     elif string[-2:] in DICTIONARY_2:
         updated_value = string[:-2] + DICTIONARY_2[string[-2:]]
-
     elif string[-1:] in DICTIONARY_1:
         updated_value = string[:-1] + DICTIONARY_1[string[-1:]]
     else:
         updated_value = string
     return updated_value
 
-def OpenData(con):
+def fetch_data_from_db(con):
+    """Gets data from database. 
+    In case of db not-set-up, it creates required table.
+    Function supposed to run several times, whenever refreshed data is necessary"""
     cur = con.cursor()
     cur.execute("create table if not exists data(id, kanji, reading, meaning, folder, is_active, level_kanji, next_review_kanji, level_translate, next_review_translate)")
     con.commit()
     data = pd.read_sql("select * from data",con, index_col="id", parse_dates=('next_review_kanji', 'next_review_translate'))
     return data
 
-def UpdateDatabase(con):
-    def OpenVocabulary():
-        def ReadFile(fname):
-            df = pd.read_csv("vocabulary\\" + fname).fillna("")
-            df['kanji'] = df['kanji'].str.strip()
-            df['reading'] = df['reading'].str.strip()
-            df = df.assign(folder = fname[:-4])
-            return df
-        
-        vocabulary = pd.concat([ReadFile(fname) for fname in os.listdir('vocabulary')] )
-        vocabulary.index = vocabulary['kanji'] + "#" + vocabulary['reading']
-        vocabulary.index.name = "id"
-
-        if not vocabulary.index.is_unique:
-            print(vocabulary.index.duplicated(keep=False))
-            raise TypeError("duplicate vocabulary identified. Please fix.") 
-        return vocabulary
+def read_vocabulary_from_text_files():
+    def read_single_vocabulary_file(fname):
+        df = pd.read_csv("vocabulary\\" + fname).fillna("")
+        df['kanji'] = df['kanji'].str.strip()
+        df['reading'] = df['reading'].str.strip()
+        df['meaning'] = df['meaning'].str.replace("​","")
+        df = df.assign(folder = fname[:-4])
+        return df
     
-    def UploadMissingVocabulary(vocabulary, data, con):
-        missing_indexes = vocabulary.index.difference(data.index)
+    vocabulary = pd.concat([read_single_vocabulary_file(fname) for fname in os.listdir('vocabulary')] )
+    vocabulary.index = vocabulary['kanji'] + "#" + vocabulary['reading']
+    vocabulary.index.name = "id"
+    if not vocabulary.index.is_unique:
+        print(vocabulary.index.duplicated(keep=False))
+        raise TypeError("duplicate vocabulary identified. Please fix.") 
+    return vocabulary
 
-        upload = vocabulary.loc[missing_indexes]
+class DatabaseUpdater:
+    def __init__(self,con):
+        self.con = con
+        self.update_stats = {}
+        self.data = fetch_data_from_db(con)
+        self.vocabulary = read_vocabulary_from_text_files()
+
+    def upload_missing_vocabulary(self):
+        missing_indexes = self.vocabulary.index.difference(self.data.index)
+        upload = self.vocabulary.loc[missing_indexes]
         upload = upload.assign(is_active = True,
                             level_kanji = 0,
                             next_review_kanji = datetime.datetime.now() , 
                             level_translate = 0,
                             next_review_translate =  datetime.datetime.now()
                             )
+        upload.to_sql('data',self.con, if_exists = 'append')
+        self.update_stats['added'] = len(upload)
 
-        upload.to_sql('data',con, if_exists = 'append')
-        return len(upload)
-
-    def DeactivateExcessiveVocabulary(vocabulary, data, con):
-        excessive_indexes = data[data["is_active"]==1].index.difference(vocabulary.index)
-        cur = con.cursor()
+    def deactivate_excessive_vocabulary(self):
+        excessive_indexes = self.data[self.data["is_active"]==1].index.difference(self.vocabulary.index)
+        cur = self.con.cursor()
         for index in excessive_indexes:
             cur.execute("update data set is_active = False where id = '{}'".format(index))
-        con.commit()
-        return len(excessive_indexes)
-    
-    def ReactivateReturningVocabulary(vocabulary, data, con):
-        returning_indexes = data[data['is_active'] == False].index.intersection(vocabulary.index)
-        cur = con.cursor()
+        self.con.commit()
+        self.update_stats['deactivated'] = len(excessive_indexes)
+
+    def reactivate_returning_vocabulary(self):
+        returning_indexes = self.data[self.data['is_active'] == False].index.intersection(self.vocabulary.index)
+        cur = self.con.cursor()
         for index in returning_indexes:
             cur.execute("update data set is_active = True where id = '{}'".format(index))
-        con.commit()
-        return len(returning_indexes)
+        self.con.commit()
+        self.update_stats['reactivated'] = len(returning_indexes)
 
-    def UpdateMeaning(vocabulary, data, con):
-        tmp = pd.concat([data["meaning"],vocabulary['meaning']], axis=1)
+    def update_meanings(self):
+        tmp = pd.concat([self.data["meaning"],self.vocabulary['meaning']], axis=1)
         tmp.columns = ['data', 'vocabulary']
         tmp = tmp[(tmp['data'] != tmp['vocabulary']) &(~tmp['data'].isna()) &(~tmp['vocabulary'].isna())]
         to_update_indexes = tmp.index
 
-        cur = con.cursor()
+        cur = self.con.cursor()
         for index in to_update_indexes:
-            cur.execute("update data set meaning = '{}' where id = '{}'".format(vocabulary.loc[index, 'meaning'],index))
-        con.commit()
-        return len(to_update_indexes)
+            cur.execute("update data set meaning = '{}' where id = '{}'".format(self.vocabulary.loc[index, 'meaning'],index))
+        self.con.commit()
+        self.update_stats['updated'] = len(to_update_indexes)
 
-    vocabulary = OpenVocabulary()
-    data = OpenData(con)
-    udate_stats = {}
-    udate_stats['added'] = UploadMissingVocabulary(vocabulary, data, con)
-    udate_stats['deactivated'] = DeactivateExcessiveVocabulary(vocabulary, data, con)
-    udate_stats['reactivated'] = ReactivateReturningVocabulary(vocabulary, data, con)
-    udate_stats['updated'] = UpdateMeaning(vocabulary, data, con)
-
-    return udate_stats
+    def run_update(self):
+        self.upload_missing_vocabulary()
+        self.deactivate_excessive_vocabulary()
+        self.reactivate_returning_vocabulary()
+        self.update_meanings()
 
 #%%
 class KanjiCheck:
@@ -187,7 +191,7 @@ class KanjiCheck:
                 break
             
             if event == "kana_input":
-                window["kana_input"].update(ConverToHiragana(values['kana_input']))
+                window["kana_input"].update(convert_to_hiragana(values['kana_input']))
 
             if event == "kana_input" + "_Enter":
                 window['meaning_input'].set_focus()
@@ -270,6 +274,7 @@ def RunKanjiChecking():
             KanjiChecks = KanjiChecks[1:]
         else:
             i = random.randint(MINIMUM_INTERVAL,MAXIMUM_INTERVAL)
+            print(i)
             KanjiChecks = KanjiChecks[1:i] + [KanjiChecks[0]] + KanjiChecks[i:]
 
 #%%
@@ -307,7 +312,7 @@ class MeaningCheck:
                 break
             
             if event == "kana_input":
-                window["kana_input"].update(ConverToHiragana(values['kana_input']))
+                window["kana_input"].update(convert_to_hiragana(values['kana_input']))
 
             if event == "kana_input" + "_Enter":
                 event = "Ok"
@@ -373,6 +378,7 @@ def RunMeaningCheck():
             MeaningChecks = MeaningChecks[1:]
         else:
             i = random.randint(MINIMUM_INTERVAL,MAXIMUM_INTERVAL)
+            print(i)
             MeaningChecks = MeaningChecks[1:i] + [MeaningChecks[0]] + MeaningChecks[i:]
 
 #%%
@@ -414,12 +420,14 @@ def Main_Window(con,data):
 
 if __name__ == "__main__":
     con = sqlite3.connect("database.db")
-    udate_stats = UpdateDatabase(con)
-    msg = "Database Updated.\nRecords added: {}\nRecords deactivated: {}\nRecords reactivated: {}\nRecords updated: {}".format(udate_stats['added'], udate_stats['deactivated'], udate_stats['reactivated'],udate_stats['updated'])
+    updater = DatabaseUpdater(con)
+    updater.run_update()
+
+    msg = "Database Updated.\nRecords added: {}\nRecords deactivated: {}\nRecords reactivated: {}\nRecords updated: {}".format(updater.update_stats['added'], updater.update_stats['deactivated'], updater.update_stats['reactivated'],updater.update_stats['updated'])
     sg.popup(msg)
 
     while True:
-        data = OpenData(con)
+        data = fetch_data_from_db(con)
         event = Main_Window(con,data)
         if event == "Close" or event == None:
             break

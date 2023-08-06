@@ -19,3 +19,5 @@ kanji,reading,meaning
 狼,おおかみ,wolf
 闇,やみ,darkness/the dark
 香辛料,こうしんりょう,spice/spices
+旅,たび,travel
+狂気, きょうき ,madness/insanity​
