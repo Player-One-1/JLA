@@ -52,4 +52,11 @@ kanji,reading,meaning
 ,できる,to be able to/can
 ,もらう,to receive/to take/to accept
  言う ,いう,to say
-  呉れる , くれる,to give/(the receiver is the speaker or someone close to the speaker)
+呉れる , くれる,to give/(the receiver is the speaker or someone close to the speaker)
+ 踊る ,おどる,to dance
+ 歌う, うたう,to sing
+ 置く , おく,to put/to place
+,あげる,to give
+始まる, はじまる,to start/to begin/(intransitive)
+終わる , おわる ,to end/to come to an end
+着く ,つく,to arrive

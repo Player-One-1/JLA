@@ -178,7 +178,6 @@ class KanjiCheck:
 
         # Display and interact with the Window
         while True:
-            
             event, values = window.read()
             # End program if user closes window or
             # presses the OK button
@@ -274,7 +273,6 @@ def RunKanjiChecking():
             KanjiChecks = KanjiChecks[1:]
         else:
             i = random.randint(MINIMUM_INTERVAL,MAXIMUM_INTERVAL)
-            print(i)
             KanjiChecks = KanjiChecks[1:i] + [KanjiChecks[0]] + KanjiChecks[i:]
 
 #%%
@@ -359,6 +357,12 @@ class MeaningCheck:
         cur.close()
         con.commit()
 
+class MeaningChecker:
+    def __init__(self,data) -> None:
+            self.selected_ids = data[ (data['next_review_translate'] < datetime.datetime.now()) & ~data['reading'].isnull() & data["is_active"]].index
+
+        
+
 def RunMeaningCheck():
     Meaning_check_selected_id = data[ (data['next_review_translate'] < datetime.datetime.now()) & ~data['reading'].isnull() & data["is_active"]].index
     MeaningChecks = [MeaningCheck(i) for i in Meaning_check_selected_id]
@@ -378,7 +382,6 @@ def RunMeaningCheck():
             MeaningChecks = MeaningChecks[1:]
         else:
             i = random.randint(MINIMUM_INTERVAL,MAXIMUM_INTERVAL)
-            print(i)
             MeaningChecks = MeaningChecks[1:i] + [MeaningChecks[0]] + MeaningChecks[i:]
 
 #%%

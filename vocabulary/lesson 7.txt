@@ -1,0 +1,4 @@
+kanji,reading,meaning
+試合, しあい,match/game
+今晩, こんばん,tonight/this evening
+,どうぞ,please/kindly/pray/I beg (of you)​

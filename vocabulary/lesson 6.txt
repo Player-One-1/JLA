@@ -6,7 +6,6 @@ kanji,reading,meaning
 来週,らいしゅう,next week​
 冊,さつ,counter for books
 机,つくえ,desk
-,あげる,to give
 生徒,せいと,pupil/student/schoolchild
 今朝,けさ,this morning
 数学, すうがく ,mathematics
@@ -28,3 +27,4 @@ kanji,reading,meaning
 水はいかがですか,みずはいかがですか,how about some water/how about some water?
 お願いします,おねがいします,please/yes please
 結構, けっこう ,sufficient/satisfactory/enough/fine/all right/OK​
+若かった,わかかった,were young/young (in the past)
