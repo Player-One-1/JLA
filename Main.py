@@ -83,29 +83,32 @@ def fetch_data_from_db(con):
     data = pd.read_sql("select * from data",con, index_col="id", parse_dates=('next_review_kanji', 'next_review_translate'))
     return data
 
-def read_vocabulary_from_text_files():
-    def read_single_vocabulary_file(fname):
-        df = pd.read_csv("vocabulary\\" + fname).fillna("")
-        df['kanji'] = df['kanji'].str.strip()
-        df['reading'] = df['reading'].str.strip()
-        df['meaning'] = df['meaning'].str.replace("​","")
-        df = df.assign(folder = fname[:-4])
-        return df
-    
-    vocabulary = pd.concat([read_single_vocabulary_file(fname) for fname in os.listdir('vocabulary')] )
-    vocabulary.index = vocabulary['kanji'] + "#" + vocabulary['reading']
-    vocabulary.index.name = "id"
-    if not vocabulary.index.is_unique:
-        print(vocabulary.index.duplicated(keep=False))
-        raise TypeError("duplicate vocabulary identified. Please fix.") 
-    return vocabulary
-
 class DatabaseUpdater:
     def __init__(self,con):
         self.con = con
         self.update_stats = {}
         self.data = fetch_data_from_db(con)
-        self.vocabulary = read_vocabulary_from_text_files()
+        self.vocabulary = DatabaseUpdater.read_vocabulary_from_text_files()
+
+    def read_vocabulary_from_text_files():
+        """Read vocabulary from text files in vocabulary folder.
+        does some basic cleaning on the file. Much can be improved here.
+        Intended to run only once, when updating database."""
+        def read_single_vocabulary_file(fname):
+            df = pd.read_csv("vocabulary\\" + fname).fillna("")
+            df['kanji'] = df['kanji'].str.strip()
+            df['reading'] = df['reading'].str.strip()
+            df['meaning'] = df['meaning'].str.replace("​","")
+            df = df.assign(folder = fname[:-4])
+            return df
+        
+        vocabulary = pd.concat([read_single_vocabulary_file(fname) for fname in os.listdir('vocabulary')] )
+        vocabulary.index = vocabulary['kanji'] + "#" + vocabulary['reading']
+        vocabulary.index.name = "id"
+        if not vocabulary.index.is_unique:
+            print(vocabulary.index.duplicated(keep=False))
+            raise TypeError("duplicate vocabulary identified. Please fix.") 
+        return vocabulary
 
     def upload_missing_vocabulary(self):
         missing_indexes = self.vocabulary.index.difference(self.data.index)
@@ -358,14 +361,19 @@ class MeaningCheck:
         con.commit()
 
 class MeaningChecker:
-    def __init__(self,data) -> None:
+    def __init__(self,data,con) -> None:
+            self.data = data
+            self.con = con
             self.selected_ids = data[ (data['next_review_translate'] < datetime.datetime.now()) & ~data['reading'].isnull() & data["is_active"]].index
-
-        
+            self.len = len(self.selected_ids)
+    
+    def run(self):
+        MeaningChecks = [MeaningCheck(id, self.data, self.con) for id in self.selected_ids]
+    
 
 def RunMeaningCheck():
     Meaning_check_selected_id = data[ (data['next_review_translate'] < datetime.datetime.now()) & ~data['reading'].isnull() & data["is_active"]].index
-    MeaningChecks = [MeaningCheck(i) for i in Meaning_check_selected_id]
+    MeaningChecks = [MeaningCheck(id) for id in Meaning_check_selected_id]
     random.shuffle(MeaningChecks)
     while MeaningChecks:
         current_item = MeaningChecks[0]
