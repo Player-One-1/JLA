@@ -2,3 +2,8 @@ kanji,reading,meaning
 試合, しあい,match/game
 今晩, こんばん,tonight/this evening
 ,どうぞ,please/kindly/pray/I beg (of you)​
+警察,けいさつ,police
+誰,だれ,who
+毛布, もうふ ,blanket
+住所,  じゅうしょ ,address
+日付,  ひづけ ,date/dating
