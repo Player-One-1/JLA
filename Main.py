@@ -7,8 +7,10 @@ import random
 #%%
 
 LEVELS_TIMINGS = {-1:"0s",0:"0s",1:"1h",2:"12h",3:"1d",4:"2d",5:"4d",6:"7d",7:"14d",8:"4w",9:"8w",10:"26w"}
+NOISE = {"lower": 0.75, 'upper' : 1.25}
 MINIMUM_INTERVAL = 5
 MAXIMUM_INTERVAL = 10
+MINIMUM_LEVEL_FOR_DROPPING = 3
 
 def convert_to_hiragana(string:str):
     """function converts string to hiragana.
@@ -82,6 +84,12 @@ def fetch_data_from_db(con):
     con.commit()
     data = pd.read_sql("select * from data",con, index_col="id", parse_dates=('next_review_kanji', 'next_review_translate'))
     return data
+
+def run_query(sql,con):
+        cur = con.cursor()
+        cur.execute(sql)
+        cur.close()
+        con.commit()
 
 class DatabaseUpdater:
     def __init__(self,con):
@@ -158,13 +166,13 @@ class DatabaseUpdater:
 
 #%%
 class KanjiCheck:
-    def __init__(self,id) -> None:
+    def __init__(self,id, data, con) -> None:
         self.id = id
         self.kanji = data.loc[id,'kanji']
         self.reading = data.loc[id,'reading']
         self.meaning = data.loc[id,'meaning']
         self.level = data.loc[id,'level_kanji']
-        self.next_review = data.loc[id,'next_review_kanji']
+        self.con = con
 
     def AskInWindow(self):
         layout = [  [sg.Text(self.kanji, font=('Arial Bold', 80), text_color='white', background_color='purple', justification='center')],     # Part 2 - The Layout
@@ -242,53 +250,56 @@ class KanjiCheck:
                 break
         window.close()
         
-
-    def UpdateLevel(self, con):
+    def UpdateLevel(self):
         if (self.meaning_correct and self.kana_correct):
             self.level = min(10, self.level + 1)
         else:
-            self.level = max(-1, self.level -1 -(self.level>3))
+            self.level = max(-1, self.level -1 -(self.level>MINIMUM_LEVEL_FOR_DROPPING))
         
-        self.next_review = (datetime.datetime.now() + pd.Timedelta(LEVELS_TIMINGS[self.level])).replace(minute=0, second=0, microsecond=1)
+        time_delta = pd.Timedelta(LEVELS_TIMINGS[self.level]) * random.uniform(NOISE['lower'], NOISE['upper'])
+        next_review = (datetime.datetime.now() + time_delta).replace(minute=0, second=0, microsecond=1)
 
         sql = "Update data set level_kanji = {}, next_review_kanji = '{}' where id = '{}'".format(self.level, self.next_review, self.id)
-        cur = con.cursor()
-        cur.execute(sql)
-        cur.close()
-        con.commit()
+        run_query(sql,self.con)
 
-def RunKanjiChecking():
-    kanji_check_selected_id = data[(data['next_review_kanji'] < datetime.datetime.now()) & (data['kanji'] != '') & data["is_active"]].index
-    KanjiChecks = [KanjiCheck(i) for i in kanji_check_selected_id]
-    random.shuffle(KanjiChecks)
-    while KanjiChecks:
-        current_item = KanjiChecks[0]
-        current_item.AskInWindow()
-        if current_item.stop:
-            break
+class KanjiChecker:
+    def __init__(self, data, con) -> None:
+            self.data = data
+            self.con = con
+            self.selected_ids = data[(data['next_review_kanji'] < datetime.datetime.now()) & (data['kanji'] != '') & data["is_active"]].index
+            self.len = len(self.selected_ids)
 
-        current_item.CheckCorectness()
-        if not (current_item.meaning_correct and current_item.kana_correct):
-            current_item.Error_Window()
-        
-        current_item.UpdateLevel(con)
-        if (current_item.meaning_correct and current_item.kana_correct):
-            KanjiChecks = KanjiChecks[1:]
-        else:
-            i = random.randint(MINIMUM_INTERVAL,MAXIMUM_INTERVAL)
-            KanjiChecks = KanjiChecks[1:i] + [KanjiChecks[0]] + KanjiChecks[i:]
+    def run(self):
+        KanjiChecks = [KanjiCheck(id, data, con) for id in self.selected_ids]
+        random.shuffle(KanjiChecks)
+        while KanjiChecks:
+            current_item = KanjiChecks[0]
+            current_item.AskInWindow()
+            if current_item.stop:
+                break
+
+            current_item.CheckCorectness()
+            if not (current_item.meaning_correct and current_item.kana_correct):
+                current_item.Error_Window()
+            
+            current_item.UpdateLevel()
+            if (current_item.meaning_correct and current_item.kana_correct):
+                KanjiChecks = KanjiChecks[1:]
+            else:
+                i = random.randint(MINIMUM_INTERVAL,MAXIMUM_INTERVAL)
+                KanjiChecks = KanjiChecks[1:i] + [KanjiChecks[0]] + KanjiChecks[i:]
 
 #%%
-class MeaningCheck:
-    def __init__(self,id) -> None:
+class TranslationCheck:
+    def __init__(self,id, data, con) -> None:
         self.id = id
         self.reading = data.loc[id,'reading']
         self.meaning = data.loc[id,'meaning']
         self.level = data.loc[id,'level_translate']
-        self.next_review = data.loc[id,'next_review_translate']    
+        self.con = con
 
     def AskInWindow(self):
-        layout = [  [sg.Text(self.meaning, font=('Arial Bold', 80), text_color='white', background_color='purple', justification='center')],     # Part 2 - The Layout
+        layout = [[sg.Text(self.meaning, font=('Arial Bold', 80), text_color='white', background_color='purple', justification='center')],
                 [sg.Input(key="kana_input", enable_events=True, font = ('Arial Bold', 20) , size=(20,10))],
                 [sg.Button('Ok'), sg.Button('Cancel')] ]
 
@@ -319,6 +330,7 @@ class MeaningCheck:
                 event = "Ok"
                 self.stop = False
                 break
+        
         window.close()
         self.kana_input = values['kana_input']
 
@@ -328,14 +340,12 @@ class MeaningCheck:
     def Error_Window(self):
         layout = [[sg.Text(self.meaning, font=('Arial Bold', 80), text_color='white', background_color='purple', justification='center')],
                   [sg.Text("reading wrong X: "+ self.kana_input, text_color="Red", font=('Arial Bold', 20), background_color="white"), sg.Button("Show",key="show_kana"), sg.Text("",key="kana", font=('Arial Bold', 20), background_color="white", text_color="Black")]
-                  
                   ]
         layout.append([sg.Button('Ok'),sg.Button('Force Correct') ])
         window = sg.Window('JLA Error Window', layout, background_color="Purple", finalize=True)      # Part 3 - Window Defintion
         window.force_focus()
 
         while True:
-            
             event, values = window.read()
             if event == "Ok" or event == sg.WIN_CLOSED:
                 break
@@ -346,21 +356,19 @@ class MeaningCheck:
                 break
         window.close()
 
-    def UpdateLevel(self, con):
+    def UpdateLevel(self):
         if self.kana_correct:
             self.level = min(10, self.level + 1)
         else:
-            self.level = max(-1, self.level -1 - (self.level>3))
+            self.level = max(-1, self.level -1 - (self.level>MINIMUM_LEVEL_FOR_DROPPING))
         
-        self.next_review = (datetime.datetime.now() + pd.Timedelta(LEVELS_TIMINGS[self.level])).replace(minute=0, second=0, microsecond=1)
+        time_delta = pd.Timedelta(LEVELS_TIMINGS[self.level]) * random.uniform(NOISE['lower'], NOISE['upper'])
+        next_review = (datetime.datetime.now() + time_delta).replace(minute=0, second=0, microsecond=1)
 
-        sql = "Update data set level_translate = {}, next_review_translate = '{}' where id = '{}'".format(self.level, self.next_review, self.id)
-        cur = con.cursor()
-        cur.execute(sql)
-        cur.close()
-        con.commit()
+        sql = "Update data set level_translate = {}, next_review_translate = '{}' where id = '{}'".format(self.level, next_review, self.id)
+        run_query(sql,con)
 
-class MeaningChecker:
+class TranslationChecker:
     def __init__(self,data,con) -> None:
             self.data = data
             self.con = con
@@ -368,65 +376,57 @@ class MeaningChecker:
             self.len = len(self.selected_ids)
     
     def run(self):
-        MeaningChecks = [MeaningCheck(id, self.data, self.con) for id in self.selected_ids]
-    
+        MeaningChecks = [TranslationCheck(id, self.data, self.con) for id in self.selected_ids]
+        random.shuffle(MeaningChecks)
+        while MeaningChecks:
+            current_item = MeaningChecks[0]
+            current_item.AskInWindow()
+            if current_item.stop:
+                break
 
-def RunMeaningCheck():
-    Meaning_check_selected_id = data[ (data['next_review_translate'] < datetime.datetime.now()) & ~data['reading'].isnull() & data["is_active"]].index
-    MeaningChecks = [MeaningCheck(id) for id in Meaning_check_selected_id]
-    random.shuffle(MeaningChecks)
-    while MeaningChecks:
-        current_item = MeaningChecks[0]
-        current_item.AskInWindow()
-        if current_item.stop:
-            break
-
-        current_item.CheckCorectness()
-        if not current_item.kana_correct:
-            current_item.Error_Window()
-        
-        current_item.UpdateLevel(con)
-        if current_item.kana_correct:
-            MeaningChecks = MeaningChecks[1:]
-        else:
-            i = random.randint(MINIMUM_INTERVAL,MAXIMUM_INTERVAL)
-            MeaningChecks = MeaningChecks[1:i] + [MeaningChecks[0]] + MeaningChecks[i:]
+            current_item.CheckCorectness()
+            if not current_item.kana_correct:
+                current_item.Error_Window()
+            
+            current_item.UpdateLevel()
+            if current_item.kana_correct:
+                MeaningChecks = MeaningChecks[1:]
+            else:
+                i = random.randint(MINIMUM_INTERVAL,MAXIMUM_INTERVAL)
+                MeaningChecks = MeaningChecks[1:i] + [MeaningChecks[0]] + MeaningChecks[i:]  
 
 #%%
-def CalculateCohorts(data):
-    cohorts = pd.DataFrame(index = range(0,11))
-    cohorts['level_kanji'] = data['level_kanji'].value_counts()
-    cohorts['level_translate'] = data['level_translate'].value_counts()
-    cohorts = cohorts.fillna(0)
-    cohorts = cohorts.astype(int)
-    cohorts.index.name = "level"
-    cohorts = cohorts.reset_index()
-    return cohorts
+def main_window(data,con):
+    def calucalte_frequency_table(data):
+        frequency_table = pd.DataFrame(index=range(0,11))
+        frequency_table['level_kanji'] = data['level_kanji'].value_counts()
+        frequency_table['level_translate'] = data['level_translate'].value_counts()
+        frequency_table = frequency_table.fillna(0)
+        frequency_table = frequency_table.astype(int)
+        frequency_table.index.name = "level"
+        frequency_table = frequency_table.reset_index()
+        return frequency_table
     
+    kanji_checker = KanjiChecker(data,con)
+    meaning_checker = TranslationChecker(data,con)
+    frequency_table = calucalte_frequency_table(data)
 
-#%%
-def Main_Window(con,data):
-    kanji_backlog = str(len(data[ (data['next_review_kanji'] < datetime.datetime.now()) & (data['kanji'] != '') & data["is_active"]].index))
-    translate_backlog = str(len(data[ (data['next_review_translate'] < datetime.datetime.now()) & ~data['reading'].isnull() & data["is_active"] ].index))
-    cohorts = CalculateCohorts(data)
-
-    layout = [[sg.Text("items: " + kanji_backlog, font=('Arial Bold', 30)), sg.Button("Kanji", font=('Arial Bold', 30))]
-              ,[sg.Text("items: " + translate_backlog, font=('Arial Bold', 30)), sg.Button("Translate", font=('Arial Bold', 30))]
-              ,[sg.Button("Close"), [sg.Table(values=cohorts.values.tolist(), headings=cohorts.columns.tolist(), size=(1000,11))]]
+    layout = [[sg.Text("items: {}".format(kanji_checker.len), font=('Arial Bold', 30)), sg.Button("Kanji", font=('Arial Bold', 30))]
+              ,[sg.Text("items: {}".format(meaning_checker.len), font=('Arial Bold', 30)), sg.Button("Translate", font=('Arial Bold', 30))]
+              ,[sg.Button("Close"), [sg.Table(values=frequency_table.values.tolist(), headings=frequency_table.columns.tolist(), size=(1000,11))]]
             ]
     
     window = sg.Window("Japanese Learning App",layout)
 
     event, values = window.read()
     if event == "Kanji":
-        RunKanjiChecking()
+        kanji_checker.run()
 
     if event == "Translate":
-        RunMeaningCheck()
+        meaning_checker.run()
     window.close()
-
     return event
-
+#%%
 def run_db_update(con):
     updater = DatabaseUpdater(con)
     updater.run_update()
@@ -442,7 +442,7 @@ if __name__ == "__main__":
 
     while True:
         data = fetch_data_from_db(con)
-        event = Main_Window(con,data)
+        event = main_window(data,con)
         if event == "Close" or event == None:
             break
 
