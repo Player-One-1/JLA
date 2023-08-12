@@ -15,7 +15,7 @@ MINIMUM_LEVEL_FOR_DROPPING = 3
 def convert_to_hiragana(string:str):
     """function converts string to hiragana.
     It really converts only last set of letters in hiragana character, but when applies after ever character, it is enough.
-    !!!to do: Complete the 4 length dictionary. Currently I ad a 4 letter combination whenever encountered, only one so far.
+    !!!to do: Complete the 4 length dictionary. Currently I add a 4 letter combination whenever encountered, only one so far.
     """
     DICTIONARY_1 = {"a": "あ", "i": "い", "u": "う", "e": "え", "o": "お"}
     DICTIONARY_2 = {"ka": "か", "ki": "き", "ku": "く", "ke": "け", "ko": "こ",
@@ -259,7 +259,7 @@ class KanjiCheck:
         time_delta = pd.Timedelta(LEVELS_TIMINGS[self.level]) * random.uniform(NOISE['lower'], NOISE['upper'])
         next_review = (datetime.datetime.now() + time_delta).replace(minute=0, second=0, microsecond=1)
 
-        sql = "Update data set level_kanji = {}, next_review_kanji = '{}' where id = '{}'".format(self.level, self.next_review, self.id)
+        sql = "Update data set level_kanji = {}, next_review_kanji = '{}' where id = '{}'".format(self.level, next_review, self.id)
         run_query(sql,self.con)
 
 class KanjiChecker:
@@ -399,8 +399,8 @@ class TranslationChecker:
 def main_window(data,con):
     def calucalte_frequency_table(data):
         frequency_table = pd.DataFrame(index=range(0,11))
-        frequency_table['level_kanji'] = data['level_kanji'].value_counts()
-        frequency_table['level_translate'] = data['level_translate'].value_counts()
+        frequency_table['level_kanji'] = data.loc[(data['kanji'] != '')&(data['is_active'] == 1),'level_kanji'].value_counts()
+        frequency_table['level_translate'] = data.loc[data['is_active']==1,'level_translate'].value_counts()
         frequency_table = frequency_table.fillna(0)
         frequency_table = frequency_table.astype(int)
         frequency_table.index.name = "level"
