@@ -9,3 +9,6 @@ kanji,reading,meaning
 小さすぎ,ちさすぎ,too small
 大好き,だいすき,liking very much/being very fond of​/loving
 欲しい,ほしい,wanting/(to have)/desiring
+塞ぐ,ふさぐ,to block/to plug/to close (eyes;mouth)
+秘密,ひみつ,secret
+胸,むね,chest/breast

@@ -12,6 +12,49 @@ MINIMUM_INTERVAL = 5
 MAXIMUM_INTERVAL = 10
 MINIMUM_LEVEL_FOR_DROPPING = 3
 
+class Inserter:
+    def __init__(self) -> None:
+        self.output = []
+        self.keep_going = True
+
+    def create_output_text(kanji,reading,meaning):
+        kanji = kanji.strip()
+        kanji = kanji.replace("\n","")
+        kanji = kanji.replace(" ","")
+        
+        reading = reading.replace("\n","")
+        reading = reading.replace(" ","")
+        meaning = meaning.replace("; ",'/')
+        if meaning[0] == " ":
+            meaning = meaning[1:]
+        return kanji + ',' + reading + ',' + meaning
+
+    def window(self):
+        layout = [[sg.Text("Kanji"), sg.Input(key="Kanji", enable_events=False, font = ('Arial Bold', 20) , size=(20,10))]
+                  ,[sg.Text("Reading"), sg.Input(key="Reading", enable_events=False, font = ('Arial Bold', 20) , size=(20,10))]
+                  ,[sg.Text("Meaning"), sg.Input(key="Meaning", enable_events=False, font = ('Arial Bold', 20) , size=(20,10))]
+                  ,[sg.Button('Next'), sg.Button('Done')]
+        ]   
+        
+        window = sg.Window('JLA', layout, background_color="Purple", finalize=True)
+        event, values = window.read()
+            # End program if user closes window or
+            # presses the OK button
+        if event == "Done" or event  == None:
+            self.keep_going = False
+
+        self.output.append(Inserter.create_output_text(values['Kanji'],values['Reading'],values['Meaning']))
+        window.close()
+
+    def print_output(self):
+        print('\n'.join(self.output))
+        
+    def run(self):
+        while self.keep_going:
+            self.window()
+        self.print_output()
+
+#%%
 def convert_to_hiragana(string:str):
     """function converts string to hiragana.
     It really converts only last set of letters in hiragana character, but when applies after ever character, it is enough.

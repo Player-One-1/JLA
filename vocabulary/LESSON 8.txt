@@ -1,0 +1,31 @@
+kanji,reading,meaning
+質問,しつもん,question
+答える,こたえる,to answer/to reply
+,じゃがいも,potato
+,はし,chopsticks
+豆,まめ,legumes
+胡椒,こしょう,pepper
+塩,しお,salt
+砂糖,さとう,sugar
+酸っぱい,すっぱい,sour/acidic
+甘い,あまい,sweet-tasting/sweet/sugary  
+辛い,からい,hot/spicy
+行くつもりいです,いくつもりいです,intend to go
+会いましょう,あいましょう,let's meet/lets meet
+,いつか,someday/one day
+,とても,very
+遊んでくれませんか,あそんでくれませんか,would you play?/(would you give me playing?)
+大きくなる,おおきくなる,to become big
+像,ぞう,image/figure/statue
+写真,しゃしん,photograph/photo/picture
+祖父,そふ,grandfather
+祖母,そぼ,grandmother
+階段,かいだん,stairs
+丘,おか ,hill
+噴水,ふんすい ,fountain
+太鼓,たいこ,drum
+芸術,げいじゅつ,art/fine art/(art techinique)
+楽器,がっき,musical instrument
+博物館,はくぶつかん,museum
+動物園,どうぶつえん,zoo/zoological gardens
+建物,たてもの,building
