@@ -61,3 +61,7 @@ kanji,reading,meaning
 終わる , おわる ,to end/to come to an end
 着く ,つく,to arrive
 手伝う,てつだう,to help/to assist/to aid​
+,なる,to become
+取る,とる,to take
+探す,さがす,to search for/to look for/to hunt for/to seek
+見つける,みつける,to discover/to find

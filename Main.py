@@ -12,10 +12,55 @@ MINIMUM_INTERVAL = 5
 MAXIMUM_INTERVAL = 10
 MINIMUM_LEVEL_FOR_DROPPING = 3
 
+class Inserter:
+    def __init__(self) -> None:
+        self.output = []
+        self.keep_going = True
+
+    def create_output_text(kanji,reading,meaning):
+        kanji = kanji.strip()
+        kanji = kanji.replace("\n","")
+        kanji = kanji.replace(" ","")
+        
+        reading = reading.replace("\n","")
+        reading = reading.replace(" ","")
+        meaning = meaning.replace("; ",'/')
+        if len(meaning) > 0 and meaning[0] == " ":
+            meaning = meaning[1:]
+        return kanji + ',' + reading + ',' + meaning
+
+    def window(self):
+        layout = [[sg.Text("Kanji"), sg.Input(key="Kanji", enable_events=False, font = ('Arial Bold', 20) , size=(20,10))]
+                  ,[sg.Text("Reading"), sg.Input(key="Reading", enable_events=False, font = ('Arial Bold', 20) , size=(20,10))]
+                  ,[sg.Text("Meaning"), sg.Input(key="Meaning", enable_events=False, font = ('Arial Bold', 20) , size=(20,10))]
+                  ,[sg.Button('Next'), sg.Button('Done')]
+        ]   
+        
+        window = sg.Window('JLA', layout, background_color="Purple", finalize=True)
+        event, values = window.read()
+            # End program if user closes window or
+            # presses the OK button
+        if event == "Done" or event  == None:
+            self.keep_going = False
+
+        self.output.append(Inserter.create_output_text(values['Kanji'],values['Reading'],values['Meaning']))
+        print((values['Kanji'],values['Reading'],values['Meaning']))
+        window.close()
+
+    def print_output(self):
+        print('\n'.join(self.output))
+        
+    def run(self):
+        while self.keep_going:
+            self.window()
+        self.print_output()
+        return self
+
+#%%
 def convert_to_hiragana(string:str):
     """function converts string to hiragana.
     It really converts only last set of letters in hiragana character, but when applies after ever character, it is enough.
-    !!!to do: Complete the 4 length dictionary. Currently I ad a 4 letter combination whenever encountered, only one so far.
+    !!!to do: Complete the 4 length dictionary. Currently I add a 4 letter combination whenever encountered, only one so far.
     """
     DICTIONARY_1 = {"a": "あ", "i": "い", "u": "う", "e": "え", "o": "お"}
     DICTIONARY_2 = {"ka": "か", "ki": "き", "ku": "く", "ke": "け", "ko": "こ",
@@ -61,7 +106,7 @@ def convert_to_hiragana(string:str):
                     "rya": "りゃ", "ryu": "りゅ", "ryo": "りょ",
                     "shi": "し", "chi": "ち", 'tsu':'つ'
                 }
-    DICTIONARY_4 = {"sshu" : "っしゅ"}
+    DICTIONARY_4 = {"sshu" : "っしゅ", "ssha" : "っしゃ"}
 
     if string[-4:] in DICTIONARY_4:
         updated_value = string[:-4] + DICTIONARY_4[string[-4:]]    
@@ -259,7 +304,7 @@ class KanjiCheck:
         time_delta = pd.Timedelta(LEVELS_TIMINGS[self.level]) * random.uniform(NOISE['lower'], NOISE['upper'])
         next_review = (datetime.datetime.now() + time_delta).replace(minute=0, second=0, microsecond=1)
 
-        sql = "Update data set level_kanji = {}, next_review_kanji = '{}' where id = '{}'".format(self.level, self.next_review, self.id)
+        sql = "Update data set level_kanji = {}, next_review_kanji = '{}' where id = '{}'".format(self.level, next_review, self.id)
         run_query(sql,self.con)
 
 class KanjiChecker:
@@ -399,8 +444,8 @@ class TranslationChecker:
 def main_window(data,con):
     def calucalte_frequency_table(data):
         frequency_table = pd.DataFrame(index=range(0,11))
-        frequency_table['level_kanji'] = data['level_kanji'].value_counts()
-        frequency_table['level_translate'] = data['level_translate'].value_counts()
+        frequency_table['level_kanji'] = data.loc[(data['kanji'] != '')&(data['is_active'] == 1),'level_kanji'].value_counts()
+        frequency_table['level_translate'] = data.loc[data['is_active']==1,'level_translate'].value_counts()
         frequency_table = frequency_table.fillna(0)
         frequency_table = frequency_table.astype(int)
         frequency_table.index.name = "level"
@@ -433,6 +478,15 @@ def run_db_update(con):
     msg = "Database Updated.\nRecords added: {}\nRecords deactivated: {}\nRecords reactivated: {}\nRecords updated: {}".format(updater.update_stats['added'], updater.update_stats['deactivated'], updater.update_stats['reactivated'],updater.update_stats['updated'])
     sg.popup(msg)
 
+def print_forcast():
+    con = sqlite3.connect("database.db")
+    data = fetch_data_from_db(con)
+    
+    intervals = ['1h', '3h', '12h', '24h']
+    for i in intervals:
+        x = len(data[(data['next_review_kanji'] < datetime.datetime.now() + pd.to_timedelta(i)) & (data['kanji'] != '') & data["is_active"]])
+        y = len(data[(data['next_review_translate'] < datetime.datetime.now() + pd.to_timedelta(i)) & ~data['reading'].isnull() & data["is_active"]].index)
+        print("{} kanji and {} translate available in {}".format(x,y,i))
 
 #%%
 
@@ -445,6 +499,9 @@ if __name__ == "__main__":
         event = main_window(data,con)
         if event == "Close" or event == None:
             break
+    
+    print_forcast()
 
 
 # %%
+

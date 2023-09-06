@@ -7,3 +7,22 @@ kanji,reading,meaning
 毛布, もうふ ,blanket
 住所,  じゅうしょ ,address
 日付,  ひづけ ,date/dating
+誕生日, たんじょうび ,birthday
+, どんな ,what kind of/what sort of
+一種,  いっしゅ ,a kind/a sort/a variety/a species​
+知り合い,しりあい,acquaintance
+鉛筆,えんぴつ,pencil
+,-いけません,is forbidden/is not allowed
+食べてはいけません,たべてはいけません,eating is forbidden
+持っていなければいけません,もっていなければいけません,must have/not having is forbidden
+食べてもいいです,たべてもいいです,eating is allowed
+演奏,えんそう,musical performance
+歌手,かしゅ,singer
+酷い,ひどい,terrible/awful/cruel/heartless
+悪い,わるい,bad/poor/undesirable
+最高,さいこう,best/most/highest
+最悪,さいあく,worst
+忙しい,いそがしい,busy/occupied/hectic
+暇,ひま,spare time/free time/leisure
+,ごめんなさい,I'm sorry/my apologies/sorry
+大丈夫,だいじょうぶ,safe/secure/sound/ok/okay
