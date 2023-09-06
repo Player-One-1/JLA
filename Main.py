@@ -25,7 +25,7 @@ class Inserter:
         reading = reading.replace("\n","")
         reading = reading.replace(" ","")
         meaning = meaning.replace("; ",'/')
-        if meaning[0] == " ":
+        if len(meaning) > 0 and meaning[0] == " ":
             meaning = meaning[1:]
         return kanji + ',' + reading + ',' + meaning
 
@@ -44,6 +44,7 @@ class Inserter:
             self.keep_going = False
 
         self.output.append(Inserter.create_output_text(values['Kanji'],values['Reading'],values['Meaning']))
+        print((values['Kanji'],values['Reading'],values['Meaning']))
         window.close()
 
     def print_output(self):
@@ -53,6 +54,7 @@ class Inserter:
         while self.keep_going:
             self.window()
         self.print_output()
+        return self
 
 #%%
 def convert_to_hiragana(string:str):
@@ -104,7 +106,7 @@ def convert_to_hiragana(string:str):
                     "rya": "りゃ", "ryu": "りゅ", "ryo": "りょ",
                     "shi": "し", "chi": "ち", 'tsu':'つ'
                 }
-    DICTIONARY_4 = {"sshu" : "っしゅ"}
+    DICTIONARY_4 = {"sshu" : "っしゅ", "ssha" : "っしゃ"}
 
     if string[-4:] in DICTIONARY_4:
         updated_value = string[:-4] + DICTIONARY_4[string[-4:]]    
@@ -476,6 +478,15 @@ def run_db_update(con):
     msg = "Database Updated.\nRecords added: {}\nRecords deactivated: {}\nRecords reactivated: {}\nRecords updated: {}".format(updater.update_stats['added'], updater.update_stats['deactivated'], updater.update_stats['reactivated'],updater.update_stats['updated'])
     sg.popup(msg)
 
+def print_forcast():
+    con = sqlite3.connect("database.db")
+    data = fetch_data_from_db(con)
+    
+    intervals = ['1h', '3h', '12h', '24h']
+    for i in intervals:
+        x = len(data[(data['next_review_kanji'] < datetime.datetime.now() + pd.to_timedelta(i)) & (data['kanji'] != '') & data["is_active"]])
+        y = len(data[(data['next_review_translate'] < datetime.datetime.now() + pd.to_timedelta(i)) & ~data['reading'].isnull() & data["is_active"]].index)
+        print("{} kanji and {} translate available in {}".format(x,y,i))
 
 #%%
 
@@ -488,6 +499,9 @@ if __name__ == "__main__":
         event = main_window(data,con)
         if event == "Close" or event == None:
             break
+    
+    print_forcast()
 
 
 # %%
+

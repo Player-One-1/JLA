@@ -49,3 +49,13 @@ kanji,reading,meaning
 宿す,やどす,to house/to contain/to harbour (a feeling)
 汗,あせ,sweat/perspiration
 瞼,まぶた,eyelid
+容易い,たやすい,easy/simple/light
+客,きゃく,guest/visitor
+跡,あと,trace/tracks/mark/sign
+救う,すくう,to rescue from/to help out of/to save
+積む,つむ,to pile up/to stack
+突然,とつぜん,abrupt/sudden/unexpected
+衝動,しょうどう,impulse/impetus/urge
+残す,のこす,to leave behind/to save/to set aside;
+圧力,あつりょく,pressure/(also political)/stress
+季節,きせつ,season/time of year
